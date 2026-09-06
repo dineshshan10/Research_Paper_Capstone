@@ -34,6 +34,14 @@ with st.sidebar:
     st.button("Clear current conversation", icon=":material/delete:", on_click=clear_current_conversation, width="stretch")
     st.caption(f"Thread: `{st.session_state.thread_id[:8]}`")
     strategy = st.selectbox("Retrieval strategy", RETRIEVAL_STRATEGIES, index=RETRIEVAL_STRATEGIES.index(DEFAULT_RETRIEVAL_STRATEGY))
+    with st.expander("Optional live services"):
+        tavily_api_key = st.text_input(
+            "Tavily API key",
+            type="password",
+            key="tavily_api_key",
+            help="Used only for this browser session when a question is outside the five-paper corpus.",
+        )
+        st.caption("For a persistent local setup, put `TAVILY_API_KEY=...` in `.env`. Do not commit API keys.")
 
 chat_tab, corpus_tab, evaluation_tab, guide_tab = st.tabs([":material/forum: Research chat", ":material/library_books: Corpus", ":material/analytics: Evaluation", ":material/help: How it works"])
 with chat_tab:
@@ -55,7 +63,7 @@ with chat_tab:
             st.write(prompt)
         with st.chat_message("assistant"):
             with st.status(":shimmer[Retrieving cited evidence]", type="compact") as status:
-                result = get_agent().ask(prompt, st.session_state.thread_id, strategy)
+                result = get_agent().ask(prompt, st.session_state.thread_id, strategy, tavily_api_key or None)
                 status.update(label="Evidence retrieved", state="complete")
             st.write(result.answer)
             render_sources(result)

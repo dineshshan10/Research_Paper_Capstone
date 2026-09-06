@@ -84,6 +84,20 @@ No key is required for local ingestion, retrieval, tests, CLI, or UI. Set `GEMIN
 generative synthesis, `OPENAI_API_KEY` to run the commercial embedding arm, and `TAVILY_API_KEY` for
 the corrective web-search branch.
 
+### Web-search fallback key
+
+Tavily is optional: it is only called for a question that cannot be supported by the five indexed
+papers. For local development, add it to the untracked `.env` file:
+
+```bash
+TAVILY_API_KEY=your_tavily_key_here
+```
+
+In Streamlit, expand **Optional live services** in the sidebar and paste a Tavily key for the current
+browser session. That field is password-masked and is not written to the repository; `.env` is the
+preferred persistent local configuration. Without a key, out-of-corpus questions receive a transparent
+response rather than a fabricated answer.
+
 ## Run all three entrypoints
 
 Activate the virtual environment first:

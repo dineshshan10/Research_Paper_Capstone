@@ -16,12 +16,12 @@ class ResearchPaperAgent:
         self.store = PaperVectorStore(embedding_provider or get_embedding_provider(embedding_key), self.chunks)
         self.retriever = PaperRetriever(self.store)
         self.history: dict[str, list[dict[str, str]]] = {}
-    def ask(self, query: str, thread_id: str = "default", strategy: str = DEFAULT_RETRIEVAL_STRATEGY) -> Answer:
+    def ask(self, query: str, thread_id: str = "default", strategy: str = DEFAULT_RETRIEVAL_STRATEGY, tavily_api_key: str | None = None) -> Answer:
         started = perf_counter(); history = self.history.setdefault(thread_id, [])
         rewritten = rewrite_query(query, history); docs = retrieve_context(self.retriever, rewritten, strategy, TOP_K_CONTEXT)
         provenance = "corpus"; message = None
         if not grade_context(rewritten, docs):
-            web = web_search(query); provenance = "web" if web else "unavailable"
+            web = web_search(query, tavily_api_key); provenance = "web" if web else "unavailable"
             if web:
                 answer_text = "\n\n".join(f"{item.get('content', '')} [{i}]" for i, item in enumerate(web, 1))
                 sources = [Source(number=i, chunk_id=f"web-{i}", paper_id="web", title=item.get("title", "Web result"), page=0, excerpt=item.get("content", "")[:500], score=float(item.get("score", 0)), url=item.get("url")) for i, item in enumerate(web, 1)]
