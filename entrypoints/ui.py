@@ -45,30 +45,34 @@ with st.sidebar:
 
 chat_tab, corpus_tab, evaluation_tab, guide_tab = st.tabs([":material/forum: Research chat", ":material/library_books: Corpus", ":material/analytics: Evaluation", ":material/help: How it works"])
 with chat_tab:
-    if not st.session_state.messages:
-        st.info("Start a research conversation, then ask a follow-up to see multi-turn memory in action.")
-        suggestion = st.pills("Try a question", ["How does Mistral improve inference efficiency?", "What is the goal of RLHF in InstructGPT?", "How is Gemini multimodal?"], label_visibility="collapsed")
-    else:
-        suggestion = None
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
-            if message.get("result"):
-                render_sources(message["result"])
-                render_inspector(message["result"])
-    prompt = suggestion or st.chat_input("Ask about the five research papers", submit_mode="disable")
-    if prompt:
+    with st.container(border=True):
+        st.caption("Ask a question or continue the active research thread")
+        with st.form("research-question-form", border=False, clear_on_submit=True):
+            prompt = st.text_input(
+                "Research question",
+                placeholder="Ask anything about the five research papers…",
+                key="research_question",
+            )
+            submitted = st.form_submit_button("Ask", type="primary")
+        if not st.session_state.messages:
+            st.caption("Try: How does Mistral improve inference efficiency? Then ask: What about its context window?")
+
+    chat_history = st.container(height=520, border=True, key="chat-history", autoscroll=True)
+    if submitted and prompt.strip():
+        prompt = prompt.strip()
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.write(prompt)
-        with st.chat_message("assistant"):
+        with chat_history:
             with st.status(":shimmer[Retrieving cited evidence]", type="compact") as status:
                 result = get_agent().ask(prompt, st.session_state.thread_id, strategy, tavily_api_key or None)
                 status.update(label="Evidence retrieved", state="complete")
-            st.write(result.answer)
-            render_sources(result)
-            render_inspector(result)
         st.session_state.messages.append({"role": "assistant", "content": result.answer, "result": result})
+    with chat_history:
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.write(message["content"])
+                if message.get("result"):
+                    render_sources(message["result"])
+                    render_inspector(message["result"])
 with corpus_tab:
     render_corpus()
 with evaluation_tab:
