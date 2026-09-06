@@ -1,23 +1,7 @@
-# Environment
-.env
 venv/
-.venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.ipynb_checkpoints/
-
-# macOS
 .DS_Store
-
-# Model + embedding caches
-.cache/
-*.safetensors
-
-# Generated artifacts -- rebuildable via scripts/
+__pycache__/
+.pytest_cache/
+.env
 data/chroma_db/
 evaluation/results/*.png
-evaluation/results/*.csv
-
-# Keep the results tables (they are submission deliverables)
-!evaluation/results/*.md

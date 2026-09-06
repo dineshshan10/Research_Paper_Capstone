@@ -243,6 +243,9 @@ WEB_SEARCH_RESULTS = 3
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+# Set to 1 after running scripts/warm_cache.py to use downloaded sentence-transformer weights.
+# Keeping this opt-in prevents a first UI launch from unexpectedly downloading multi-GB models.
+USE_NEURAL_EMBEDDINGS = os.getenv("USE_NEURAL_EMBEDDINGS", "0").lower() in {"1", "true", "yes"}
 
 
 @dataclass(frozen=True)
