@@ -12,6 +12,15 @@ from config.settings import DEFAULT_RETRIEVAL_STRATEGY, RETRIEVAL_STRATEGIES
 from core.graph import get_agent
 from entrypoints.ui_components import render_conversation_guide, render_corpus, render_evaluation, render_inspector, render_sources
 
+SAMPLE_QUESTIONS = (
+    "How does Mistral improve inference efficiency?",
+    "What is the goal of RLHF in InstructGPT?",
+    "How does Gemini handle text and images?",
+    "Compare Mistral attention with the original Transformer.",
+    "What is DeepSeek-R1's training recipe?",
+    "What is the temperature on Venus?",
+)
+
 def start_new_conversation() -> None:
     st.session_state.messages = []
     st.session_state.thread_id = str(uuid4())
@@ -50,16 +59,21 @@ with chat_tab:
         with st.form("research-question-form", border=False, clear_on_submit=True):
             prompt = st.text_input(
                 "Research question",
-                placeholder="Ask anything about the five research papers…",
+                placeholder="Ask anything about any AI research papers…",
                 key="research_question",
             )
             submitted = st.form_submit_button("Ask", type="primary")
-        if not st.session_state.messages:
-            st.caption("Try: How does Mistral improve inference efficiency? Then ask: What about its context window?")
+        st.caption("Sample questions")
+        sample_prompt = None
+        with st.container(horizontal=True, wrap=True, gap="xsmall"):
+            for index, question in enumerate(SAMPLE_QUESTIONS):
+                if st.button(question, key=f"sample-question-{index}", width="content"):
+                    sample_prompt = question
 
     chat_history = st.container(height=520, border=True, key="chat-history", autoscroll=True)
-    if submitted and prompt.strip():
-        prompt = prompt.strip()
+    incoming_prompt = sample_prompt or (prompt.strip() if submitted else "")
+    if incoming_prompt:
+        prompt = incoming_prompt
         st.session_state.messages.append({"role": "user", "content": prompt})
         with chat_history:
             with st.status(":shimmer[Retrieving cited evidence]", type="compact") as status:

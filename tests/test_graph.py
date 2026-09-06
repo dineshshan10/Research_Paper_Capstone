@@ -28,3 +28,9 @@ def test_request_tavily_key_reaches_corrective_search(monkeypatch):
     monkeypatch.setattr("core.graph.web_search", lambda query, key: received.update({"key": key}) or [])
     agent.ask("What is DeepSeek-R1 training recipe?", "web-key", tavily_api_key="session-key")
     assert received["key"] == "session-key"
+
+def test_venus_question_is_blocked_by_corpus_guard():
+    chunks=[PaperChunk(id="attention-1", content="Transformers use self attention.", paper_id="attention", title="Attention", page=1, chunk_index=0)]
+    agent=ResearchPaperAgent(chunks=chunks, embedding_provider=HashFallbackEmbedding(EMBEDDING_REGISTRY["minilm"]))
+    answer=agent.ask("What is the temperature on Venus?", "venus")
+    assert answer.provenance == "unavailable" and not answer.sources
